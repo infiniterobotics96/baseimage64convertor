@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image to Base64</title>
+    <script src="https://thunkable.github.io/webviewer-extension/thunkableWebviewerExtension.js" type="text/javascript"></script>
+</head>
+<body>
+    <div style="font-family: sans-serif; text-align: center; padding: 20px;">
+        <h3>Converting Image...</h3>
+        <p id="status">Waiting for input...</p>
+        <canvas id="canvas" style="display:none;"></canvas>
+    </div>
+
+    <script type="text/javascript">
+        // 1. Listen for a message from Thunkable (The Image URL)
+        ThunkableWebviewerExtension.receiveMessage(function(message) {
+            
+            // "message" is the File Path/URL sent from Thunkable blocks
+            document.getElementById('status').innerText = "Processing: " + message;
+            
+            toDataURL(message, function(dataUrl) {
+                // 3. Send the Base64 string back to Thunkable
+                ThunkableWebviewerExtension.postMessage(dataUrl);
+                document.getElementById('status').innerText = "Done! Sent back to app.";
+            });
+        });
+
+        // 2. The Conversion Logic
+        function toDataURL(url, callback) {
+            var xhr = new XMLHttpRequest();
+            xhr.onload = function() {
+                var reader = new FileReader();
+                reader.onloadend = function() {
+                    callback(reader.result);
+                }
+                reader.readAsDataURL(xhr.response);
+            };
+            xhr.open('GET', url);
+            xhr.responseType = 'blob';
+            xhr.send();
+        }
+    </script>
+</body>
+</html>
